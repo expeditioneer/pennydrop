@@ -1,5 +1,5 @@
 object AndroidSDK {
-    const val min = 30
-    const val compile = 32
-    const val target = 32
+    const val min = 34
+    const val compile = 36
+    const val target = 36
 }

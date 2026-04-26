@@ -1,6 +1,8 @@
 plugins {
-    id(BuildPlugins.androidApplication) version Versions.buildTools apply false
-    id(BuildPlugins.androidLibrary) version Versions.buildTools apply false
-    id(BuildPlugins.kotlinAndroid) version Versions.kotlin apply false
-    id(BuildPlugins.hilt) version Versions.Jetpack.hilt apply false
+    id(BuildPlugins.androidApplication) version Versions.BUILD_TOOLS apply false
+    id(BuildPlugins.androidLibrary) version Versions.BUILD_TOOLS apply false
+    id(BuildPlugins.kotlinAndroid) version Versions.KOTLIN apply false
+    id(BuildPlugins.kotlinCompose) version Versions.KOTLIN apply false
+    id(BuildPlugins.ksp) version Versions.Google.KSP apply false
+    id(BuildPlugins.hilt) version Versions.Google.HILT apply false
 }

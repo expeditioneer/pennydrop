@@ -1,7 +1,7 @@
 plugins {
-    kotlin("kapt")
     id(BuildPlugins.androidApplication)
-    id(BuildPlugins.kotlinAndroid)
+    id(BuildPlugins.kotlinCompose)
+    id(BuildPlugins.ksp)
     id(BuildPlugins.hilt)
 }
 
@@ -20,12 +20,18 @@ android {
     }
 
     buildFeatures {
-        dataBinding = true
+        compose = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -33,40 +39,44 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+    kotlin {
+        jvmToolchain(21)
     }
 
-    kotlinOptions {
-        jvmTarget = "1.8"
+    hilt {
+        enableAggregatingTask = true
     }
 }
 
 dependencies {
-    implementation(Libraries.JetPack.appcompat)
+    implementation(platform("androidx.compose:compose-bom:2026.05.01"))
+
     implementation(Libraries.JetPack.coreKtx)
-    implementation(Libraries.JetPack.hilt)
-    implementation(Libraries.JetPack.material)
-    implementation(Libraries.JetPack.constrainedLayout)
+    implementation(Libraries.JetPack.constraintLayoutCompose)
     implementation(Libraries.JetPack.lifecycleLivedata)
     implementation(Libraries.JetPack.lifecycleViewmodel)
-    implementation(Libraries.JetPack.navigationUiKtx)
-    implementation(Libraries.JetPack.navigationFragment)
+    implementation(Libraries.JetPack.navigationCompose)
+    implementation(Libraries.JetPack.hiltNavigationCompose)
     implementation(Libraries.JetPack.preferenceKtx)
-    implementation(Libraries.JetPack.recyclerview)
     implementation(Libraries.JetPack.roomKtx)
     implementation(Libraries.JetPack.roomRuntime)
 
-    kapt(Libraries.JetPack.hiltCompiler)
-    kapt(Libraries.JetPack.roomCompiler)
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:${Versions.Jetpack.LIFECYCLE}")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.activity:activity-compose:1.9.1")
+
+    implementation(Libraries.Google.hilt)
+    implementation(Libraries.Google.material)
+
+    ksp(Libraries.Google.hiltCompiler)
+    ksp(Libraries.JetPack.roomCompiler)
 
     testImplementation(TestLibraries.junit)
 
     androidTestImplementation(TestLibraries.AndroidXTest.junit)
     androidTestImplementation(TestLibraries.AndroidXTest.espressoCore)
-}
-
-kapt {
-    correctErrorTypes = true
 }
