@@ -112,16 +112,4 @@ abstract class PennyDropDao {
     abstract fun getCompletedGameStatusesWithPlayers(
         finishedGameState: GameState = GameState.Finished
     ): LiveData<List<GameStatusWithPlayer>>
-
-    companion object {
-        @Volatile
-        private var instance: PennyDropRepository? = null
-
-        fun getInstance(pennyDropDao: PennyDropDao) =
-            this.instance ?: synchronized(this) {
-                instance ?: PennyDropRepository(pennyDropDao).also {
-                    instance = it
-                }
-            }
-    }
 }
