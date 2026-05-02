@@ -7,10 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import dev.lamm.pennydrop.data.PennyDropCallback
 import dev.lamm.pennydrop.data.PennyDropDao
 import dev.lamm.pennydrop.data.PennyDropDatabase
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -19,15 +17,12 @@ object RoomModule {
     @Singleton
     @Provides
     fun provideApplicationDatabase(
-        @ApplicationContext context: Context,
-        provider: Provider<PennyDropDao>
+        @ApplicationContext context: Context
     ): PennyDropDatabase {
         return Room.databaseBuilder(
             context,
             PennyDropDatabase::class.java,
             PennyDropDatabase.DATABASE_NAME
-        ).addCallback(
-            PennyDropCallback(provider)
         ).build()
     }
 

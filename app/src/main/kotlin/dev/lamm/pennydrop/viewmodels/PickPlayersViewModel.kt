@@ -8,6 +8,7 @@ class PickPlayersViewModel: ViewModel() {
     val players = MutableLiveData<List<NewPlayer>>().apply {
         this.value = (1..6).map {
             NewPlayer(
+                playerName = "Player $it",
                 canBeRemoved = it > 2,
                 canBeToggled = it > 1
             )

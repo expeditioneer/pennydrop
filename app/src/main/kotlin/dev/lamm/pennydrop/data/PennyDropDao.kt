@@ -68,8 +68,13 @@ abstract class PennyDropDao {
             )
         )
 
+        val usedIds = mutableSetOf<Long>()
         val playerIds = players.map { player ->
-            getPlayer(player.playerName)?.playerId ?: insertPlayer(player)
+            val existing = getPlayer(player.playerName)?.playerId
+            val id = if (existing != null && existing !in usedIds) existing
+                else insertPlayer(player)
+            usedIds += id
+            id
         }
 
         this.insertGameStatuses(
