@@ -15,6 +15,9 @@
     <string name="player_type_image">Player Type Image</string>
     <string name="games_played">Games Played</string>
     <string name="settings">Settings</string>
+    <string name="category_game_settings">Game Settings</string>
+    <string name="category_theme_settings">Theme Settings</string>
+    <string name="category_about">About the App</string>
     <string name="starting_penny_count_new_game">This only takes effect on a new game.</string>
     <string name="starting_penny_count">Starting penny count</string>
     <string name="fast_ai_summary">Fast AI summary</string>
