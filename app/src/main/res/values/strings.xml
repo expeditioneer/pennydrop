@@ -22,7 +22,6 @@
     <string name="starting_penny_count">Starting penny count</string>
     <string name="fast_ai_summary">Fast AI summary</string>
     <string name="fast_ai">Fast AI</string>
-    <string name="app_theme">App Theme</string>
     <string name="theme_mode">Theme Mode (Light/Dark)</string>
     <string name="penny_drop_created_by">The <![CDATA[<i>Penny Drop</i>]]> app was initially created by Michael Fazio for the Pragmatic Bookshelf title <![CDATA[<a href="https://pragprog.com/titles/mfjetpack/">"Kotlin and Android Development featuring Jetpack"</a>]]>.</string>
     <string name="penny_drop_description">Start <![CDATA[<b>building</b>]]> modern, high-quality Android apps by working through two projects (including Penny Drop!) that use Kotlin and the Jetpack suite of libraries, tools, and practices.</string>
