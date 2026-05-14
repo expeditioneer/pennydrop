@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -151,7 +150,7 @@ private fun AppNavHost(
         modifier = modifier
     ) {
         composable(Routes.PICK_PLAYERS) {
-            val pickPlayersViewModel: PickPlayersViewModel = viewModel(viewModelStoreOwner = activity)
+            val pickPlayersViewModel: PickPlayersViewModel = hiltViewModel(viewModelStoreOwner = activity)
             val gameViewModel: GameViewModel = hiltViewModel(viewModelStoreOwner = activity)
             val players by pickPlayersViewModel.players.observeAsState(emptyList())
             val scope = androidx.compose.runtime.rememberCoroutineScope()
