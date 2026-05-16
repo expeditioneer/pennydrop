@@ -5,8 +5,8 @@ import dev.lamm.pennydrop.data.Game
 data class Slot(
     val number: Int,
     val canBeFilled: Boolean = true,
-    var isFilled: Boolean = false,
-    var lastRolled: Boolean = false
+    val isFilled: Boolean = false,
+    val lastRolled: Boolean = false
 ) {
     companion object {
         fun mapFromGame(game: Game?) =
@@ -19,11 +19,6 @@ data class Slot(
                 )
             }
     }
-}
-
-fun List<Slot>.clear() = this.forEach { slot ->
-    slot.isFilled = false
-    slot.lastRolled = false
 }
 
 fun List<Slot>.fullSlots(): Int =
