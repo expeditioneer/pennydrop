@@ -1,7 +1,8 @@
 package dev.lamm.pennydrop.viewmodels
 
 import android.app.Application
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.lamm.pennydrop.data.GameState
@@ -14,6 +15,11 @@ import dev.lamm.pennydrop.game.TurnResult
 import dev.lamm.pennydrop.types.Player
 import dev.lamm.pennydrop.types.Slot
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 import javax.inject.Inject
@@ -24,61 +30,44 @@ class GameViewModel @Inject constructor(
     private val repository: PennyDropRepository
 ) : AndroidViewModel(application) {
 
-    private val currentGameStatuses: LiveData<List<GameStatus>> =
-        this.repository.getCurrentGameStatuses()
     private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
-
     private var clearText = false
 
-    val currentGame = MediatorLiveData<GameWithPlayers>()
-    val currentPlayer: LiveData<Player>
-    val currentStandingsText: LiveData<String>
+    private val sharing = SharingStarted.WhileSubscribed(5_000)
 
-    val slots: LiveData<List<Slot>>
+    private val currentGameStatuses: StateFlow<List<GameStatus>> =
+        repository.getCurrentGameStatuses()
+            .stateIn(viewModelScope, sharing, emptyList())
 
-    val canRoll: LiveData<Boolean>
-    val canPass: LiveData<Boolean>
+    val currentGame: StateFlow<GameWithPlayers?> =
+        combine(
+            repository.getCurrentGameWithPlayers(),
+            currentGameStatuses
+        ) { gameWithPlayers, statuses ->
+            gameWithPlayers?.updateStatuses(statuses)
+        }.stateIn(viewModelScope, sharing, null)
 
-    init {
-        this.currentGame.addSource(
-            this.repository.getCurrentGameWithPlayers()
-        ) { gameWithPlayers ->
-            updateCurrentGame(gameWithPlayers, this.currentGameStatuses.value)
+    val currentPlayer: StateFlow<Player?> = currentGame
+        .map { gameWithPlayers -> gameWithPlayers?.players?.firstOrNull { it.isRolling } }
+        .stateIn(viewModelScope, sharing, null)
+
+    val currentStandingsText: StateFlow<String?> = currentGame
+        .map { gameWithPlayers ->
+            gameWithPlayers?.players?.let { generateCurrentStandings(it) }
         }
+        .stateIn(viewModelScope, sharing, null)
 
-        this.currentGame.addSource(this.currentGameStatuses) { gameStatuses ->
-            updateCurrentGame(this.currentGame.value, gameStatuses)
-        }
+    val slots: StateFlow<List<Slot>> = currentGame
+        .map { Slot.mapFromGame(it?.game) }
+        .stateIn(viewModelScope, sharing, Slot.mapFromGame(null))
 
-        this.currentPlayer = Transformations.map(this.currentGame) { gameWithPlayers ->
-            gameWithPlayers?.players?.firstOrNull { it.isRolling }
-        }
+    val canRoll: StateFlow<Boolean> = currentGame
+        .map { it?.game?.canRoll == true && it.players.firstOrNull { p -> p.isRolling }?.isHuman == true }
+        .stateIn(viewModelScope, sharing, false)
 
-        this.currentStandingsText = Transformations.map(this.currentGame) { gameWithPlayers ->
-            gameWithPlayers?.players?.let { players ->
-                this.generateCurrentStandings(players)
-            }
-        }
-
-        this.slots = Transformations.map(this.currentGame) { gameWithPlayers ->
-            Slot.mapFromGame(gameWithPlayers?.game)
-        }
-
-        this.canRoll = Transformations.map(this.currentPlayer) { player ->
-            player?.isHuman == true && currentGame.value?.game?.canRoll == true
-        }
-
-        this.canPass = Transformations.map(this.currentPlayer) { player ->
-            player?.isHuman == true && currentGame.value?.game?.canPass == true
-        }
-    }
-
-    private fun updateCurrentGame(
-        gameWithPlayers: GameWithPlayers?,
-        gameStatuses: List<GameStatus>?
-    ) {
-        this.currentGame.value = gameWithPlayers?.updateStatuses(gameStatuses)
-    }
+    val canPass: StateFlow<Boolean> = currentGame
+        .map { it?.game?.canPass == true && it.players.firstOrNull { p -> p.isRolling }?.isHuman == true }
+        .stateIn(viewModelScope, sharing, false)
 
     private fun generateCurrentStandings(
         players: List<Player>,
@@ -98,11 +87,11 @@ class GameViewModel @Inject constructor(
     }
 
     private fun generateGameOverText(): String {
-        val statuses = this.currentGameStatuses.value
-        val players = this.currentGame.value?.players?.map { player ->
+        val statuses = currentGameStatuses.value
+        val players = currentGame.value?.players?.map { player ->
             player.apply {
                 this.pennies = statuses
-                    ?.firstOrNull { it.playerId == playerId }
+                    .firstOrNull { it.playerId == playerId }
                     ?.pennies
                     ?: Player.defaultPennyCount
             }
@@ -145,7 +134,7 @@ class GameViewModel @Inject constructor(
         val currentPlayer = currentPlayer.value
         val slots = slots.value
 
-        if (game != null && players != null && currentPlayer != null && slots != null) {
+        if (game != null && players != null && currentPlayer != null) {
             GameHandler
                 .playAITurn(players, currentPlayer, slots, game.canPass)?.let { result ->
                     updateFromGameHandler(result)
@@ -167,7 +156,7 @@ class GameViewModel @Inject constructor(
             )
         } ?: return
 
-        val statuses = currentGameStatuses.value?.map { status ->
+        val statuses = currentGameStatuses.value.map { status ->
             when (status.playerId) {
                 result.previousPlayer?.playerId -> {
                     status.copy(
@@ -175,6 +164,7 @@ class GameViewModel @Inject constructor(
                         pennies = status.pennies + (result.coinChangeCount ?: 0)
                     )
                 }
+
                 result.currentPlayer?.playerId -> {
                     status.copy(
                         isRolling = !result.isGameOver,
@@ -184,9 +174,10 @@ class GameViewModel @Inject constructor(
                                 } else 0
                     )
                 }
+
                 else -> status
             }
-        } ?: emptyList()
+        }
 
         viewModelScope.launch {
             repository.updateGameAndStatuses(game, statuses)
@@ -204,12 +195,12 @@ class GameViewModel @Inject constructor(
     }
 
     fun roll() {
-        val game = this.currentGame.value?.game
-        val players = this.currentGame.value?.players
-        val currentPlayer = this.currentPlayer.value
-        val slots = this.slots.value
+        val game = currentGame.value?.game
+        val players = currentGame.value?.players
+        val currentPlayer = currentPlayer.value
+        val slots = slots.value
 
-        if (game != null && players != null && currentPlayer != null && slots != null && game.canRoll) {
+        if (game != null && players != null && currentPlayer != null && game.canRoll) {
             updateFromGameHandler(
                 GameHandler.roll(players, currentPlayer, slots)
             )
@@ -217,9 +208,9 @@ class GameViewModel @Inject constructor(
     }
 
     fun pass() {
-        val game = this.currentGame.value?.game
-        val players = this.currentGame.value?.players
-        val currentPlayer = this.currentPlayer.value
+        val game = currentGame.value?.game
+        val players = currentGame.value?.players
+        val currentPlayer = currentPlayer.value
 
         if (game != null && players != null && currentPlayer != null && game.canPass) {
             updateFromGameHandler(
@@ -227,8 +218,4 @@ class GameViewModel @Inject constructor(
             )
         }
     }
-}
-
-private fun <T> MutableLiveData<List<T>>.notifyChange() {
-    this.value = this.value
 }

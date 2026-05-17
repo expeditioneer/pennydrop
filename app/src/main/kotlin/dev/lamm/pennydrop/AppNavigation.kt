@@ -15,12 +15,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -152,7 +152,7 @@ private fun AppNavHost(
         composable(Routes.PICK_PLAYERS) {
             val pickPlayersViewModel: PickPlayersViewModel = hiltViewModel(viewModelStoreOwner = activity)
             val gameViewModel: GameViewModel = hiltViewModel(viewModelStoreOwner = activity)
-            val players by pickPlayersViewModel.players.observeAsState(emptyList())
+            val players by pickPlayersViewModel.players.collectAsStateWithLifecycle()
             val scope = androidx.compose.runtime.rememberCoroutineScope()
 
             PickPlayersScreen(
@@ -162,9 +162,8 @@ private fun AppNavHost(
                     scope.launch {
                         gameViewModel.startGame(
                             pickPlayersViewModel.players.value
-                                ?.filter { it.isIncluded }
-                                ?.map { it.toPlayer() }
-                                ?: emptyList()
+                                .filter { it.isIncluded }
+                                .map { it.toPlayer() }
                         )
                         navController.navigate(Routes.GAME) {
                             popUpTo(Routes.PICK_PLAYERS) { saveState = true }
@@ -177,12 +176,12 @@ private fun AppNavHost(
 
         composable(Routes.GAME) {
             val gameViewModel: GameViewModel = hiltViewModel(viewModelStoreOwner = activity)
-            val slots by gameViewModel.slots.observeAsState(emptyList())
-            val currentPlayer by gameViewModel.currentPlayer.observeAsState()
-            val currentGame by gameViewModel.currentGame.observeAsState()
-            val standings by gameViewModel.currentStandingsText.observeAsState("")
-            val canRoll by gameViewModel.canRoll.observeAsState(false)
-            val canPass by gameViewModel.canPass.observeAsState(false)
+            val slots by gameViewModel.slots.collectAsStateWithLifecycle()
+            val currentPlayer by gameViewModel.currentPlayer.collectAsStateWithLifecycle()
+            val currentGame by gameViewModel.currentGame.collectAsStateWithLifecycle()
+            val standings by gameViewModel.currentStandingsText.collectAsStateWithLifecycle()
+            val canRoll by gameViewModel.canRoll.collectAsStateWithLifecycle()
+            val canPass by gameViewModel.canPass.collectAsStateWithLifecycle()
 
             GameScreen(
                 slots = slots,
@@ -200,7 +199,7 @@ private fun AppNavHost(
 
         composable(Routes.RANKINGS) {
             val rankingsViewModel: RankingsViewModel = hiltViewModel(viewModelStoreOwner = activity)
-            val summaries by rankingsViewModel.playerSummaries.observeAsState(emptyList())
+            val summaries by rankingsViewModel.playerSummaries.collectAsStateWithLifecycle()
             RankingsScreen(summaries = summaries)
         }
 

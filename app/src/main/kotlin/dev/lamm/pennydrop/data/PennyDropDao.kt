@@ -1,8 +1,8 @@
 package dev.lamm.pennydrop.data
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import dev.lamm.pennydrop.types.Player
+import kotlinx.coroutines.flow.Flow
 import java.time.OffsetDateTime
 
 @Dao
@@ -24,7 +24,7 @@ abstract class PennyDropDao {
 
     @Transaction
     @Query("SELECT * FROM games ORDER BY startTime DESC LIMIT 1")
-    abstract fun getCurrentGameWithPlayers(): LiveData<GameWithPlayers>
+    abstract fun getCurrentGameWithPlayers(): Flow<GameWithPlayers?>
 
     @Transaction
     @Query(
@@ -39,7 +39,7 @@ abstract class PennyDropDao {
             ORDER BY gamePlayerNumber
     """
     )
-    abstract fun getCurrentGameStatuses(): LiveData<List<GameStatus>>
+    abstract fun getCurrentGameStatuses(): Flow<List<GameStatus>>
 
     @Query(
         """
@@ -116,5 +116,5 @@ abstract class PennyDropDao {
     )
     abstract fun getCompletedGameStatusesWithPlayers(
         finishedGameState: GameState = GameState.Finished
-    ): LiveData<List<GameStatusWithPlayer>>
+    ): Flow<List<GameStatusWithPlayer>>
 }

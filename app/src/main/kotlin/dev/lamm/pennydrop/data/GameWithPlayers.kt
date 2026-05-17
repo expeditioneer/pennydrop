@@ -21,11 +21,11 @@ data class GameWithPlayers(
                     gameStatuses
                         .firstOrNull { it.playerId == player.playerId }
                         ?.let { gameStatus ->
-                            player.apply {
-                                pennies = gameStatus.pennies
-                                isRolling = gameStatus.isRolling
+                            player.copy(
+                                pennies = gameStatus.pennies,
+                                isRolling = gameStatus.isRolling,
                                 gamePlayerNumber = gameStatus.gamePlayerNumber
-                            }
+                            )
                         } ?: player
                 }.sortedBy { it.gamePlayerNumber }
             )
