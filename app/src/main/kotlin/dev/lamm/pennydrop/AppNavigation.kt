@@ -13,8 +13,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -63,14 +68,24 @@ private val topLevelDestinations = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PennyDropApp() {
-    PennyDropTheme {
-        PennyDropScaffold()
+    val context = LocalContext.current
+    val prefs = remember { PreferenceManager.getDefaultSharedPreferences(context) }
+    var themeMode by rememberSaveable {
+        mutableStateOf(prefs.getString("themeMode", "System") ?: "System")
+    }
+    val darkTheme = when (themeMode) {
+        "Light" -> false
+        "Dark" -> true
+        else -> isSystemInDarkTheme()
+    }
+    PennyDropTheme(darkTheme = darkTheme) {
+        PennyDropScaffold(onThemeModeChanged = { themeMode = it })
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PennyDropScaffold() {
+private fun PennyDropScaffold(onThemeModeChanged: (String) -> Unit) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -132,7 +147,8 @@ private fun PennyDropScaffold() {
     ) { innerPadding ->
         AppNavHost(
             navController = navController,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            onThemeModeChanged = onThemeModeChanged
         )
     }
 }
@@ -140,7 +156,8 @@ private fun PennyDropScaffold() {
 @Composable
 private fun AppNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onThemeModeChanged: (String) -> Unit
 ) {
     val activity = LocalContext.current as ComponentActivity
 
@@ -207,14 +224,7 @@ private fun AppNavHost(
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
             SettingsScreen(
                 prefs = prefs,
-                onThemeModeChanged = { value ->
-                    val nightMode = when (value) {
-                        "Light" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-                        "Dark" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-                        else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                    }
-                    androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(nightMode)
-                },
+                onThemeModeChanged = onThemeModeChanged,
                 onCreditsClicked = { navController.navigate(Routes.ABOUT) }
             )
         }
