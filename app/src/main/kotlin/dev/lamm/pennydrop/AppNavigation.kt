@@ -1,6 +1,9 @@
 package dev.lamm.pennydrop
 
+import android.graphics.Color
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -15,6 +18,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +82,17 @@ fun PennyDropApp() {
         "Dark" -> true
         else -> isSystemInDarkTheme()
     }
+
+    val activity = LocalContext.current as ComponentActivity
+    DisposableEffect(darkTheme) {
+        val style = SystemBarStyle.auto(
+            lightScrim = Color.TRANSPARENT,
+            darkScrim = Color.TRANSPARENT
+        ) { darkTheme }
+        activity.enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
+        onDispose {}
+    }
+
     PennyDropTheme(darkTheme = darkTheme) {
         PennyDropScaffold(onThemeModeChanged = { themeMode = it })
     }
