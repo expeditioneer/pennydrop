@@ -1,17 +1,16 @@
 package dev.lamm.pennydrop.types
 
-import androidx.databinding.ObservableBoolean
 import dev.lamm.pennydrop.game.AI
 
 data class NewPlayer(
-    var playerName: String = "",
-    val isHuman: ObservableBoolean = ObservableBoolean(true),
+    val playerName: String = "",
+    val isHuman: Boolean = true,
     val canBeRemoved: Boolean = true,
     val canBeToggled: Boolean = true,
-    var isIncluded: ObservableBoolean = ObservableBoolean(!canBeRemoved),
-    var selectedAIPosition: Int = -1
+    val isIncluded: Boolean = !canBeRemoved,
+    val selectedAIPosition: Int = -1
 ) {
-    fun selectedAI() = if (!isHuman.get()) {
+    fun selectedAI(): AI? = if (!isHuman) {
         AI.basicAI.getOrNull(selectedAIPosition)
     } else {
         null
@@ -19,20 +18,9 @@ data class NewPlayer(
 
     fun toPlayer() = Player(
         playerName =
-            if (this.isHuman.get()) this.playerName
+            if (this.isHuman) this.playerName
             else (this.selectedAI()?.name ?: "AI"),
-        isHuman = this.isHuman.get(),
+        isHuman = this.isHuman,
         selectedAI = this.selectedAI()
     )
-
-    override fun toString() = listOf(
-        "name" to this.playerName,
-        "isIncluded" to this.isIncluded.get(),
-        "isHuman" to this.isHuman.get(),
-        "canBeRemoved" to this.canBeRemoved,
-        "canBeToggled" to this.canBeToggled,
-        "selectedAI" to (this.selectedAI()?.name ?: "N/A")
-    ).joinToString(", ", "NewPlayer(", ")") { (property, value) ->
-        "$property=$value"
-    }
 }

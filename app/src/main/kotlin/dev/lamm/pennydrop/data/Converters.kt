@@ -37,7 +37,7 @@ class Converters {
             .filter { numberingString -> !TextUtils.isEmpty(numberingString) }
             .map { numberingString ->
                 numberingString.toInt()
-            } ?: emptyList()
+            }
     }
 
     @TypeConverter
