@@ -1,14 +1,15 @@
 package dev.lamm.pennydrop.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Checkbox
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -18,7 +19,9 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +37,15 @@ import androidx.compose.ui.unit.dp
 import dev.lamm.pennydrop.R
 import dev.lamm.pennydrop.game.AI
 import dev.lamm.pennydrop.types.NewPlayer
+
+private enum class PlayerMode { Off, Human, Ai }
+
+private val NewPlayer.mode: PlayerMode
+    get() = when {
+        !isIncluded -> PlayerMode.Off
+        isHuman -> PlayerMode.Human
+        else -> PlayerMode.Ai
+    }
 
 @Composable
 fun PickPlayersScreen(
@@ -45,12 +56,14 @@ fun PickPlayersScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             players.forEachIndexed { index, player ->
-                PlayerRow(
+                PlayerCard(
+                    index = index,
                     player = player,
                     onPlayerChanged = { transform -> onUpdatePlayer(index, transform) }
                 )
@@ -71,42 +84,62 @@ fun PickPlayersScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PlayerRow(
+private fun PlayerCard(
+    index: Int,
     player: NewPlayer,
     onPlayerChanged: ((NewPlayer) -> NewPlayer) -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(
-            checked = player.isIncluded,
-            onCheckedChange = { checked ->
-                onPlayerChanged { it.copy(isIncluded = checked) }
-            },
-            enabled = player.canBeRemoved,
-            modifier = Modifier.alpha(if (player.canBeRemoved) 1f else 0f)
-        )
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Player ${index + 1}",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
-        Box(modifier = Modifier.weight(1f)) {
-            if (player.isHuman) {
-                NameField(player = player, onPlayerChanged = onPlayerChanged)
-            } else {
-                AiDropdown(player = player, onPlayerChanged = onPlayerChanged)
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                SegmentedButton(
+                    selected = player.mode == PlayerMode.Off,
+                    onClick = { onPlayerChanged { it.copy(isIncluded = false) } },
+                    enabled = player.canBeRemoved,
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3)
+                ) { Text(stringResource(R.string.player_off)) }
+
+                SegmentedButton(
+                    selected = player.mode == PlayerMode.Human,
+                    onClick = { onPlayerChanged { it.copy(isIncluded = true, isHuman = true) } },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3)
+                ) { Text(stringResource(R.string.player_human)) }
+
+                SegmentedButton(
+                    selected = player.mode == PlayerMode.Ai,
+                    onClick = {
+                        onPlayerChanged {
+                            it.copy(
+                                isIncluded = true,
+                                isHuman = false,
+                                selectedAIPosition = if (it.selectedAIPosition >= 0) it.selectedAIPosition else 0
+                            )
+                        }
+                    },
+                    enabled = player.canBeToggled,
+                    shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3)
+                ) { Text(stringResource(R.string.player_ai)) }
+            }
+
+            AnimatedVisibility(visible = player.isIncluded) {
+                when (player.mode) {
+                    PlayerMode.Human -> NameField(player = player, onPlayerChanged = onPlayerChanged)
+                    PlayerMode.Ai -> AiDropdown(player = player, onPlayerChanged = onPlayerChanged)
+                    PlayerMode.Off -> Unit
+                }
             }
         }
-
-        Switch(
-            checked = player.isHuman,
-            onCheckedChange = { checked ->
-                onPlayerChanged { it.copy(isHuman = checked) }
-            },
-            enabled = player.isIncluded && player.canBeToggled,
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .alpha(if (player.canBeToggled) 1f else 0f)
-        )
     }
 }
 
@@ -120,7 +153,6 @@ private fun NameField(
         onValueChange = { value ->
             onPlayerChanged { it.copy(playerName = value) }
         },
-        enabled = player.isIncluded,
         placeholder = { Text(stringResource(R.string.player_name)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
@@ -138,17 +170,16 @@ private fun AiDropdown(
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { if (player.isIncluded) expanded = it }
+        onExpandedChange = { expanded = it }
     ) {
         OutlinedTextField(
             value = selectedAiName,
             onValueChange = {},
             readOnly = true,
-            enabled = player.isIncluded,
             placeholder = { Text(stringResource(R.string.player_name)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = player.isIncluded)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 .fillMaxWidth()
         )
         ExposedDropdownMenu(

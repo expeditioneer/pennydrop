@@ -31,4 +31,7 @@
     <string name="about_penny_drop">About Penny Drop</string>
     <string name="penny_drop">Penny Drop</string>
     <string name="pick_players">Pick Players</string>
+    <string name="player_off">Off</string>
+    <string name="player_human">Human</string>
+    <string name="player_ai">AI</string>
 </resources>
