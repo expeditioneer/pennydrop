@@ -70,12 +70,20 @@ class GameViewModel @Inject constructor(
         .map { it?.game?.canPass == true && it.players.firstOrNull { p -> p.isRolling }?.isHuman == true }
         .stateIn(viewModelScope, sharing, false)
 
+    private fun pennies(count: Int): String =
+        getApplication<Application>().resources
+            .getQuantityString(R.plurals.pennies, count, count)
+
     private fun generateCurrentStandings(
         players: List<Player>,
         headerText: String = getApplication<Application>().getString(R.string.current_standings)
     ) = players.sortedBy { it.pennies }
-        .joinToString(separator = "\n", prefix = "$headerText\n") {
-            "\t${it.playerName} - ${it.pennies} pennies"
+        .joinToString(separator = "\n", prefix = "$headerText\n") { player ->
+            getApplication<Application>().getString(
+                R.string.standings_row,
+                player.playerName,
+                pennies(player.pennies)
+            )
         }
 
     private fun updateFilledSlots(
@@ -106,7 +114,7 @@ class GameViewModel @Inject constructor(
 
         val app = getApplication<Application>()
         return """${app.getString(R.string.game_over)}
-            |${winningPlayer.playerName} is the winner!
+            |${app.getString(R.string.game_winner, winningPlayer.playerName)}
             |
             |${generateCurrentStandings(players, "${app.getString(R.string.final_scores)}\n")}
         """.trimMargin()
@@ -119,12 +127,27 @@ class GameViewModel @Inject constructor(
         clearText = result.turnEnd != null
 
         val currentPlayerName = result.currentPlayer?.playerName ?: "???"
+        val app = getApplication<Application>()
 
         return when {
             result.isGameOver -> generateGameOverText()
-            result.turnEnd == TurnEnd.Bust -> "${result.previousPlayer?.playerName} rolled a ${result.lastRoll}.  They collected ${result.coinChangeCount} pennies for a total of ${result.previousPlayer?.pennies}.\n$currentText"
-            result.turnEnd == TurnEnd.Pass -> "${result.previousPlayer?.playerName} passed.  They currently have ${result.previousPlayer?.pennies} pennies.\n$currentText"
-            result.lastRoll != null -> "$currentPlayerName rolled a ${result.lastRoll}.\n$currentText"
+            result.turnEnd == TurnEnd.Bust -> app.getString(
+                R.string.turn_busted,
+                result.previousPlayer?.playerName.orEmpty(),
+                result.lastRoll ?: 0,
+                pennies(result.coinChangeCount ?: 0),
+                pennies(result.previousPlayer?.pennies ?: 0)
+            ) + currentText
+            result.turnEnd == TurnEnd.Pass -> app.getString(
+                R.string.turn_passed,
+                result.previousPlayer?.playerName.orEmpty(),
+                pennies(result.previousPlayer?.pennies ?: 0)
+            ) + currentText
+            result.lastRoll != null -> app.getString(
+                R.string.turn_rolled,
+                currentPlayerName,
+                result.lastRoll
+            ) + currentText
             else -> ""
         }
     }

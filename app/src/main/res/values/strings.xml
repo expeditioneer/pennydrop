@@ -43,4 +43,9 @@
     <string name="final_scores">Final Scores:</string>
     <string name="game_over">Game Over!</string>
     <string name="game_started">The game has begun!\n</string>
+    <string name="game_winner">%1$s is the winner!</string>
+    <string name="turn_rolled">%1$s rolled a %2$d.\n</string>
+    <string name="turn_passed">%1$s passed.  They currently have %2$s.\n</string>
+    <string name="turn_busted">%1$s rolled a %2$d.  They collected %3$s for a total of %4$s.\n</string>
+    <string name="standings_row">\t%1$s - %2$s</string>
 </resources>
