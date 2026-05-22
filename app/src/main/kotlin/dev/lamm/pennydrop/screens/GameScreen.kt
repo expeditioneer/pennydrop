@@ -1,5 +1,12 @@
 package dev.lamm.pennydrop.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,8 +27,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -204,9 +213,22 @@ private fun CoinSlotView(
     val filled = slot.canBeFilled && slot.isFilled
     val highlighted = slot.lastRolled
 
-    val containerColor = if (filled) cs.primaryContainer else cs.surfaceVariant
-    val borderColor = if (highlighted) cs.primary else cs.outlineVariant
-    val borderWidth = if (highlighted) 2.dp else 1.dp
+    val containerColor by animateColorAsState(
+        targetValue = if (filled) cs.primaryContainer else cs.surfaceVariant,
+        label = "slot-container"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (highlighted) cs.primary else cs.outlineVariant,
+        label = "slot-border"
+    )
+    val borderWidth by animateDpAsState(
+        targetValue = if (highlighted) 2.dp else 1.dp,
+        label = "slot-border-width"
+    )
+    val numberColor by animateColorAsState(
+        targetValue = if (highlighted) cs.primary else cs.onSurfaceVariant,
+        label = "slot-number"
+    )
 
     Column(
         modifier = modifier,
@@ -220,20 +242,29 @@ private fun CoinSlotView(
             modifier = Modifier.size(48.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
-                if (filled) {
-                    Icon(
-                        painter = painterResource(R.drawable.mdi_coin_black_24dp),
-                        contentDescription = stringResource(R.string.coin_icon),
-                        tint = cs.onPrimaryContainer
-                    )
-                }
+                AnimatedCoin(visible = filled, tint = cs.onPrimaryContainer)
             }
         }
         Text(
             text = slot.number.toString(),
             style = MaterialTheme.typography.titleMedium,
-            color = if (highlighted) cs.primary else cs.onSurfaceVariant,
+            color = numberColor,
             fontWeight = if (highlighted) FontWeight.Bold else FontWeight.Normal
+        )
+    }
+}
+
+@Composable
+private fun AnimatedCoin(visible: Boolean, tint: Color) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = scaleIn(initialScale = 0.5f) + fadeIn(),
+        exit = scaleOut(targetScale = 0.5f) + fadeOut()
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.mdi_coin_black_24dp),
+            contentDescription = stringResource(R.string.coin_icon),
+            tint = tint
         )
     }
 }
