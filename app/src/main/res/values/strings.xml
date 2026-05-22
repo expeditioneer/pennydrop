@@ -35,4 +35,6 @@
     <string name="player_ai">AI</string>
     <string name="no_game_title">No active game</string>
     <string name="no_game_hint">Pick your players to start a new round.</string>
+    <string name="no_rankings_title">No games played yet</string>
+    <string name="no_rankings_hint">Finish a game to see standings here.</string>
 </resources>

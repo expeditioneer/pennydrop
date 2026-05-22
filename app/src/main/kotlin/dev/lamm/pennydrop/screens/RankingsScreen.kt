@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -24,10 +23,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.lamm.pennydrop.R
+import dev.lamm.pennydrop.components.EmptyState
 import dev.lamm.pennydrop.types.PlayerSummary
 
 @Composable
 fun RankingsScreen(summaries: List<PlayerSummary>) {
+    if (summaries.isEmpty()) {
+        EmptyState(
+            icon = painterResource(R.drawable.ic_baseline_format_list_numbered_24),
+            title = stringResource(R.string.no_rankings_title),
+            description = stringResource(R.string.no_rankings_hint)
+        )
+        return
+    }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(summaries, key = { it.id }) { summary ->
             PlayerSummaryRow(summary)
@@ -50,7 +58,8 @@ private fun PlayerSummaryRow(summary: PlayerSummary) {
                 else R.drawable.ic_baseline_android_24
             ),
             contentDescription = stringResource(R.string.player_type_image),
-            tint = if (summary.isHuman) HumanColor else AiColor,
+            tint = if (summary.isHuman) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp)
                 .size(56.dp)
@@ -84,9 +93,6 @@ private fun PlayerSummaryRow(summary: PlayerSummary) {
         }
     }
 }
-
-private val HumanColor = Color(0xFF00DDFF) // holo_blue_bright
-private val AiColor = Color(0xFF99CC00)    // holo_green_light
 
 @Preview
 @Composable
