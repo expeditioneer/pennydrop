@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -91,11 +92,13 @@ private fun IconsText() {
 
 @Composable
 private fun Images() {
+    val tint = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         Image(
             painter = painterResource(id = R.drawable.mdi_coin_black_24dp),
             contentDescription = stringResource(id = R.string.coin_icon),
             contentScale = ContentScale.FillHeight,
+            colorFilter = tint,
             modifier = Modifier
                 .defaultMinSize(minHeight = 52.dp)
                 .weight(1f)
@@ -104,6 +107,7 @@ private fun Images() {
             painter = painterResource(id = R.drawable.mdi_dice_6_black_24dp),
             contentDescription = stringResource(id = R.string.dice_icon),
             contentScale = ContentScale.FillHeight,
+            colorFilter = tint,
             modifier = Modifier
                 .defaultMinSize(minHeight = 52.dp)
                 .weight(1f)
