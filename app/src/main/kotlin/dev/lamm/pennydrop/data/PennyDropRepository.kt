@@ -12,8 +12,11 @@ class PennyDropRepository(private val pennyDropDao: PennyDropDao) {
     fun getCompletedGameStatusesWithPlayers() =
         pennyDropDao.getCompletedGameStatusesWithPlayers()
 
-    suspend fun startGame(players: List<Player>, pennyCount: Int? = null) =
-        pennyDropDao.startGame(players, pennyCount)
+    suspend fun startGame(
+        players: List<Player>,
+        pennyCount: Int? = null,
+        initialTurnText: String
+    ) = pennyDropDao.startGame(players, pennyCount, initialTurnText)
 
     suspend fun updateGameAndStatuses(
         game: Game,

@@ -97,7 +97,7 @@ private fun PlayerCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Player ${index + 1}",
+                text = stringResource(R.string.player_default_name, index + 1),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

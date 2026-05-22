@@ -57,13 +57,17 @@ abstract class PennyDropDao {
     abstract suspend fun insertGameStatuses(gameStatuses: List<GameStatus>)
 
     @Transaction
-    open suspend fun startGame(players: List<Player>, pennyCount: Int? = null): Long {
+    open suspend fun startGame(
+        players: List<Player>,
+        pennyCount: Int? = null,
+        initialTurnText: String
+    ): Long {
         this.closeOpenGames()
 
         val gameId = this.insertGame(
             Game(
                 gameState = GameState.Started,
-                currentTurnText = "The game has begun!\n",
+                currentTurnText = initialTurnText,
                 canRoll = true
             )
         )

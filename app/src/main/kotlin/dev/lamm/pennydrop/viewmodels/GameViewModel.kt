@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.lamm.pennydrop.R
 import dev.lamm.pennydrop.data.GameState
 import dev.lamm.pennydrop.data.GameStatus
 import dev.lamm.pennydrop.data.GameWithPlayers
@@ -71,7 +72,7 @@ class GameViewModel @Inject constructor(
 
     private fun generateCurrentStandings(
         players: List<Player>,
-        headerText: String = "Current Standings:"
+        headerText: String = getApplication<Application>().getString(R.string.current_standings)
     ) = players.sortedBy { it.pennies }
         .joinToString(separator = "\n", prefix = "$headerText\n") {
             "\t${it.playerName} - ${it.pennies} pennies"
@@ -103,10 +104,11 @@ class GameViewModel @Inject constructor(
 
         if (players == null || winningPlayer == null) return "N/A"
 
-        return """Game Over!
+        val app = getApplication<Application>()
+        return """${app.getString(R.string.game_over)}
             |${winningPlayer.playerName} is the winner!
             |
-            |${generateCurrentStandings(players, "Final Scores:\n")}
+            |${generateCurrentStandings(players, "${app.getString(R.string.final_scores)}\n")}
         """.trimMargin()
     }
 
@@ -190,7 +192,8 @@ class GameViewModel @Inject constructor(
     suspend fun startGame(playersForNewGame: List<Player>) {
         repository.startGame(
             playersForNewGame,
-            prefs?.getInt("pennyCount", Player.defaultPennyCount)
+            prefs?.getInt("pennyCount", Player.defaultPennyCount),
+            getApplication<Application>().getString(R.string.game_started)
         )
     }
 
