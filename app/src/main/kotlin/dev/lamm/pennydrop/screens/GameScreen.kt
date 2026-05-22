@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -30,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.lamm.pennydrop.R
 import dev.lamm.pennydrop.types.Slot
 
@@ -55,12 +52,11 @@ fun GameScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, bottom = 5.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.Top
         ) {
@@ -79,35 +75,32 @@ fun GameScreen(
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = currentPlayerName,
-                fontSize = 32.sp,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp)
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.weight(1f)
             )
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(end = 32.dp)
-            ) {
-                Text(text = coinsLeft.toString(), fontSize = 24.sp)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = coinsLeft.toString(),
+                    style = MaterialTheme.typography.headlineSmall
+                )
                 Text(
                     text = stringResource(R.string.coins_left),
-                    fontSize = 12.sp
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
                 onClick = onRoll,
@@ -127,11 +120,9 @@ fun GameScreen(
             }
             Text(
                 text = stringResource(R.string.or),
-                fontSize = 24.sp,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 8.dp),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
             )
             Button(
                 onClick = onPass,
@@ -153,18 +144,18 @@ fun GameScreen(
 
         Text(
             text = turnInfo,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
                 .verticalScroll(rememberScrollState())
         )
 
         Text(
             text = standings,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -213,19 +204,14 @@ private fun CoinSlotView(
     val filled = slot.canBeFilled && slot.isFilled
     val highlighted = slot.lastRolled
 
-    val containerColor = when {
-        filled -> cs.primaryContainer
-        else -> cs.surfaceVariant
-    }
-    val borderColor = when {
-        highlighted -> cs.primary
-        else -> cs.outlineVariant
-    }
+    val containerColor = if (filled) cs.primaryContainer else cs.surfaceVariant
+    val borderColor = if (highlighted) cs.primary else cs.outlineVariant
     val borderWidth = if (highlighted) 2.dp else 1.dp
 
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Surface(
             shape = CircleShape,
@@ -243,12 +229,9 @@ private fun CoinSlotView(
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
         Text(
             text = slot.number.toString(),
-            fontSize = 18.sp,
+            style = MaterialTheme.typography.titleMedium,
             color = if (highlighted) cs.primary else cs.onSurfaceVariant,
             fontWeight = if (highlighted) FontWeight.Bold else FontWeight.Normal
         )
