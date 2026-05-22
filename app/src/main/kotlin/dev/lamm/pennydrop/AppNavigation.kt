@@ -5,27 +5,37 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -69,7 +79,6 @@ private val topLevelDestinations = listOf(
     TopLevelDest(Routes.RANKINGS, R.string.rankings, R.drawable.ic_baseline_format_list_numbered_24)
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PennyDropApp() {
     val context = LocalContext.current
@@ -98,16 +107,20 @@ fun PennyDropApp() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 private fun PennyDropScaffold(onThemeModeChanged: (String) -> Unit) {
+    val activity = LocalContext.current as ComponentActivity
+    val windowSizeClass = calculateWindowSizeClass(activity)
+    val useRail = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { Text(text = stringResource(titleResFor(currentRoute))) },
                 navigationIcon = {
                     if (currentRoute == Routes.SETTINGS || currentRoute == Routes.ABOUT) {
@@ -121,50 +134,102 @@ private fun PennyDropScaffold(onThemeModeChanged: (String) -> Unit) {
                 },
                 actions = {
                     if (currentRoute in topLevelDestinations.map { it.route }) {
-                        IconButton(onClick = { navController.navigate(Routes.SETTINGS) }) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_baseline_settings_24),
-                                contentDescription = stringResource(R.string.settings)
-                            )
-                        }
+                        OverflowMenu(
+                            onSettingsClick = { navController.navigate(Routes.SETTINGS) },
+                            onAboutClick = { navController.navigate(Routes.ABOUT) }
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors()
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors()
             )
         },
         bottomBar = {
-            NavigationBar {
-                topLevelDestinations.forEach { dest ->
-                    val selected = backStackEntry?.destination?.hierarchy
-                        ?.any { it.route == dest.route } == true
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(dest.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(dest.iconRes),
-                                contentDescription = null
-                            )
-                        },
-                        label = { Text(text = stringResource(dest.labelRes)) }
-                    )
+            if (!useRail) {
+                NavigationBar {
+                    topLevelDestinations.forEach { dest ->
+                        val selected = backStackEntry?.destination?.hierarchy
+                            ?.any { it.route == dest.route } == true
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = { navController.navigateToTopLevel(dest.route) },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(dest.iconRes),
+                                    contentDescription = null
+                                )
+                            },
+                            label = { Text(text = stringResource(dest.labelRes)) }
+                        )
+                    }
                 }
             }
         }
     ) { innerPadding ->
-        AppNavHost(
-            navController = navController,
-            modifier = Modifier.padding(innerPadding),
-            onThemeModeChanged = onThemeModeChanged
+        Row(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            if (useRail) {
+                NavigationRail {
+                    topLevelDestinations.forEach { dest ->
+                        val selected = backStackEntry?.destination?.hierarchy
+                            ?.any { it.route == dest.route } == true
+                        NavigationRailItem(
+                            selected = selected,
+                            onClick = { navController.navigateToTopLevel(dest.route) },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(dest.iconRes),
+                                    contentDescription = null
+                                )
+                            },
+                            label = { Text(text = stringResource(dest.labelRes)) }
+                        )
+                    }
+                }
+            }
+            AppNavHost(
+                navController = navController,
+                onThemeModeChanged = onThemeModeChanged
+            )
+        }
+    }
+}
+
+@Composable
+private fun OverflowMenu(
+    onSettingsClick: () -> Unit,
+    onAboutClick: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    IconButton(onClick = { expanded = true }) {
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = stringResource(R.string.more_options)
         )
+    }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.settings)) },
+            onClick = {
+                expanded = false
+                onSettingsClick()
+            }
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.about_penny_drop)) },
+            onClick = {
+                expanded = false
+                onAboutClick()
+            }
+        )
+    }
+}
+
+private fun NavHostController.navigateToTopLevel(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }
 
@@ -226,15 +291,7 @@ private fun AppNavHost(
                 canPass = canPass,
                 onRoll = gameViewModel::roll,
                 onPass = gameViewModel::pass,
-                onPickPlayers = {
-                    navController.navigate(Routes.PICK_PLAYERS) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
+                onPickPlayers = { navController.navigateToTopLevel(Routes.PICK_PLAYERS) }
             )
         }
 
