@@ -1,29 +1,33 @@
 package dev.lamm.pennydrop.screens
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +36,7 @@ import dev.lamm.pennydrop.types.Slot
 
 @Composable
 fun GameScreen(
+    isGameActive: Boolean,
     slots: List<Slot>,
     currentPlayerName: String,
     coinsLeft: Int,
@@ -40,8 +45,13 @@ fun GameScreen(
     canRoll: Boolean,
     canPass: Boolean,
     onRoll: () -> Unit,
-    onPass: () -> Unit
+    onPass: () -> Unit,
+    onPickPlayers: () -> Unit
 ) {
+    if (!isGameActive) {
+        NoActiveGame(onPickPlayers = onPickPlayers)
+        return
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -160,43 +170,87 @@ fun GameScreen(
 }
 
 @Composable
+private fun NoActiveGame(onPickPlayers: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.mdi_dice_6_black_24dp),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(72.dp)
+        )
+        Text(
+            text = stringResource(R.string.no_game_title),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+        Text(
+            text = stringResource(R.string.no_game_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
+        )
+        FilledTonalButton(onClick = onPickPlayers) {
+            Text(text = stringResource(R.string.pick_players))
+        }
+    }
+}
+
+@Composable
 private fun CoinSlotView(
     slot: Slot,
     modifier: Modifier = Modifier
 ) {
-    val highlight = MaterialTheme.colorScheme.primary
-    val baseLine = Color.Black
-    val baseText = Color.Black
+    val cs = MaterialTheme.colorScheme
+    val filled = slot.canBeFilled && slot.isFilled
+    val highlighted = slot.lastRolled
+
+    val containerColor = when {
+        filled -> cs.primaryContainer
+        else -> cs.surfaceVariant
+    }
+    val borderColor = when {
+        highlighted -> cs.primary
+        else -> cs.outlineVariant
+    }
+    val borderWidth = if (highlighted) 2.dp else 1.dp
 
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier.size(36.dp),
-            contentAlignment = Alignment.Center
+        Surface(
+            shape = CircleShape,
+            color = containerColor,
+            border = BorderStroke(borderWidth, borderColor),
+            modifier = Modifier.size(48.dp)
         ) {
-            if (slot.canBeFilled && slot.isFilled) {
-                Icon(
-                    painter = painterResource(R.drawable.mdi_coin_black_24dp),
-                    contentDescription = stringResource(R.string.coin_icon),
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
+            Box(contentAlignment = Alignment.Center) {
+                if (filled) {
+                    Icon(
+                        painter = painterResource(R.drawable.mdi_coin_black_24dp),
+                        contentDescription = stringResource(R.string.coin_icon),
+                        tint = cs.onPrimaryContainer
+                    )
+                }
             }
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(5.dp)
-                .background(if (slot.lastRolled) highlight else baseLine)
-        )
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = slot.number.toString(),
-            fontSize = 24.sp,
-            color = if (slot.lastRolled) highlight else baseText,
-            fontWeight = if (slot.lastRolled) FontWeight.Bold else FontWeight.Normal
+            fontSize = 18.sp,
+            color = if (highlighted) cs.primary else cs.onSurfaceVariant,
+            fontWeight = if (highlighted) FontWeight.Bold else FontWeight.Normal
         )
     }
 }
@@ -214,6 +268,7 @@ private fun GameScreenPreview() {
     )
     MaterialTheme {
         GameScreen(
+            isGameActive = true,
             slots = slots,
             currentPlayerName = "Michael",
             coinsLeft = 7,
@@ -222,7 +277,8 @@ private fun GameScreenPreview() {
             canRoll = true,
             canPass = true,
             onRoll = {},
-            onPass = {}
+            onPass = {},
+            onPickPlayers = {}
         )
     }
 }

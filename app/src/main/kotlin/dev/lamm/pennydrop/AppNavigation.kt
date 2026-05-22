@@ -216,16 +216,25 @@ private fun AppNavHost(
             val canPass by gameViewModel.canPass.collectAsStateWithLifecycle()
 
             GameScreen(
+                isGameActive = currentGame != null,
                 slots = slots,
-                currentPlayerName = currentPlayer?.playerName
-                    ?: stringResource(R.string.na),
+                currentPlayerName = currentPlayer?.playerName.orEmpty(),
                 coinsLeft = currentPlayer?.pennies ?: 0,
                 turnInfo = currentGame?.game?.currentTurnText.orEmpty(),
                 standings = standings.orEmpty(),
                 canRoll = canRoll,
                 canPass = canPass,
                 onRoll = gameViewModel::roll,
-                onPass = gameViewModel::pass
+                onPass = gameViewModel::pass,
+                onPickPlayers = {
+                    navController.navigate(Routes.PICK_PLAYERS) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
             )
         }
 
