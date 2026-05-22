@@ -153,7 +153,7 @@ private fun NameField(
         onValueChange = { value ->
             onPlayerChanged { it.copy(playerName = value) }
         },
-        placeholder = { Text(stringResource(R.string.player_name)) },
+        label = { Text(stringResource(R.string.player_name)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
@@ -176,7 +176,7 @@ private fun AiDropdown(
             value = selectedAiName,
             onValueChange = {},
             readOnly = true,
-            placeholder = { Text(stringResource(R.string.player_name)) },
+            label = { Text(stringResource(R.string.player_ai)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
