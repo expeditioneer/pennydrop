@@ -21,7 +21,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.lamm.pennydrop.R
 import dev.lamm.pennydrop.components.EmptyState
 import dev.lamm.pennydrop.types.PlayerSummary
@@ -49,8 +48,9 @@ private fun PlayerSummaryRow(summary: PlayerSummary) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Icon(
             painter = painterResource(
@@ -60,35 +60,33 @@ private fun PlayerSummaryRow(summary: PlayerSummary) {
             contentDescription = stringResource(R.string.player_type_image),
             tint = if (summary.isHuman) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp)
-                .size(56.dp)
+            modifier = Modifier.size(56.dp)
         )
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = summary.name,
-                fontSize = 32.sp,
                 style = MaterialTheme.typography.headlineSmall
             )
             Text(
                 text = "${summary.gamesPlayed} ${stringResource(R.string.games_played)}",
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(end = 16.dp)
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = summary.winsString,
-                fontSize = 32.sp
+                style = MaterialTheme.typography.headlineSmall
             )
             Text(
                 text = pluralStringResource(R.plurals.wins, summary.wins).uppercase(),
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
