@@ -6,4 +6,5 @@ plugins {
     id(BuildPlugins.ksp) version Versions.Google.KSP apply false
     id(BuildPlugins.hilt) version Versions.Google.HILT apply false
     id(BuildPlugins.detekt) version Versions.DETEKT apply false
+    id(BuildPlugins.cyclonedx) version Versions.CYCLONEDX apply false
 }

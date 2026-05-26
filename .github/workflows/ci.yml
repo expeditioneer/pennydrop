@@ -37,14 +37,23 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      - name: Assemble, test, lint, detekt
+      - name: Assemble, test, lint, detekt, SBOM
         run: |
           nix develop --command ./gradlew \
             assembleDebug \
             testDebugUnitTest \
             lintDebug \
             detekt \
+            cyclonedxDirectBom \
             --no-daemon --stacktrace
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v7
+        with:
+          name: sbom
+          path: app/build/reports/sbom/
+          retention-days: 90
+          if-no-files-found: error
 
       - name: Upload reports on failure
         if: failure()

@@ -4,12 +4,20 @@ plugins {
     id(BuildPlugins.ksp)
     id(BuildPlugins.hilt)
     id(BuildPlugins.detekt)
+    id(BuildPlugins.cyclonedx)
 }
 
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
     baseline = file("$rootDir/config/detekt/baseline.xml")
+}
+
+tasks.cyclonedxDirectBom {
+    includeConfigs.set(listOf("releaseRuntimeClasspath"))
+    skipConfigs.set(listOf(".*test.*", ".*Test.*", ".*debug.*", ".*Debug.*"))
+    jsonOutput.set(layout.buildDirectory.file("reports/sbom/bom.json"))
+    xmlOutput.set(layout.buildDirectory.file("reports/sbom/bom.xml"))
 }
 
 android {
