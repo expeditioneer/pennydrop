@@ -1,6 +1,7 @@
 object Versions {
     const val BUILD_TOOLS = "9.0.1"
     const val KOTLIN = "2.3.21"
+    const val DETEKT = "2.0.0-alpha.2"
 
     object Jetpack {
         const val APP_COMPAT = "1.7.0"

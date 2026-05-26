@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:GameViewModel.kt:GameViewModel$game != null &amp;&amp; players != null &amp;&amp; currentPlayer != null &amp;&amp; game.canPass</ID>
+    <ID>ComplexCondition:GameViewModel.kt:GameViewModel$game != null &amp;&amp; players != null &amp;&amp; currentPlayer != null &amp;&amp; game.canRoll</ID>
+    <ID>LongMethod:AppNavigation.kt:@Composable private fun AppNavHost</ID>
+    <ID>LongMethod:AppNavigation.kt:@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class) @Composable private fun PennyDropScaffold</ID>
+    <ID>LongMethod:GameScreen.kt:@Composable fun GameScreen</ID>
+    <ID>MagicNumber:GameScreen.kt:3</ID>
+    <ID>MagicNumber:GameScreen.kt:3f</ID>
+    <ID>MagicNumber:GameScreen.kt:4</ID>
+    <ID>MagicNumber:GameScreen.kt:5</ID>
+    <ID>MagicNumber:GameScreen.kt:6</ID>
+    <ID>MagicNumber:GameViewModel.kt:GameViewModel$100</ID>
+    <ID>MagicNumber:GameViewModel.kt:GameViewModel$1000</ID>
+    <ID>MagicNumber:GameViewModel.kt:GameViewModel$5_000</ID>
+    <ID>MagicNumber:GameViewModel.kt:GameViewModel$6</ID>
+    <ID>MagicNumber:PickPlayersViewModel.kt:PickPlayersViewModel$6</ID>
+    <ID>MagicNumber:RankingsScreen.kt:3</ID>
+    <ID>MagicNumber:RankingsViewModel.kt:RankingsViewModel$5_000</ID>
+    <ID>MagicNumber:SettingsScreen.kt:10</ID>
+    <ID>MagicNumber:Slot.kt:Slot.Companion$6</ID>
+    <ID>NewLineAtEndOfFile:Converters.kt:dev.lamm.pennydrop.data.Converters.kt</ID>
+    <ID>NewLineAtEndOfFile:Game.kt:dev.lamm.pennydrop.data.Game.kt</ID>
+    <ID>NewLineAtEndOfFile:GameState.kt:dev.lamm.pennydrop.data.GameState.kt</ID>
+    <ID>NewLineAtEndOfFile:GameStatus.kt:dev.lamm.pennydrop.data.GameStatus.kt</ID>
+    <ID>NewLineAtEndOfFile:GameStatusWithPlayer.kt:dev.lamm.pennydrop.data.GameStatusWithPlayer.kt</ID>
+    <ID>NewLineAtEndOfFile:GameWithPlayers.kt:dev.lamm.pennydrop.data.GameWithPlayers.kt</ID>
+    <ID>NewLineAtEndOfFile:PennyDropDao.kt:dev.lamm.pennydrop.data.PennyDropDao.kt</ID>
+    <ID>NewLineAtEndOfFile:PennyDropRepository.kt:dev.lamm.pennydrop.data.PennyDropRepository.kt</ID>
+    <ID>TooManyFunctions:PennyDropDao.kt:PennyDropDao</ID>
+    <ID>WildcardImport:PennyDropDao.kt:import androidx.room.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

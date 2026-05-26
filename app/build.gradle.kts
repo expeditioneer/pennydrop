@@ -3,6 +3,13 @@ plugins {
     id(BuildPlugins.kotlinCompose)
     id(BuildPlugins.ksp)
     id(BuildPlugins.hilt)
+    id(BuildPlugins.detekt)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+    baseline = file("$rootDir/config/detekt/baseline.xml")
 }
 
 android {

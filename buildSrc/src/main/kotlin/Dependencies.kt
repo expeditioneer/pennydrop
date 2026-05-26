@@ -1,6 +1,7 @@
 object BuildPlugins {
     val androidApplication by lazy { "com.android.application" }
     val androidLibrary by lazy { "com.android.library" }
+    val detekt by lazy { "dev.detekt" }
     val hilt by lazy { "com.google.dagger.hilt.android" }
     val kotlinAndroid by lazy { "org.jetbrains.kotlin.android" }
     val kotlinCompose by lazy { "org.jetbrains.kotlin.plugin.compose" }
