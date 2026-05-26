@@ -1,3 +1,5 @@
+import org.cyclonedx.model.Component
+
 plugins {
     id(BuildPlugins.androidApplication)
     id(BuildPlugins.kotlinCompose)
@@ -14,6 +16,11 @@ detekt {
 }
 
 tasks.cyclonedxDirectBom {
+    componentGroup.set("dev.lamm")
+    componentName.set("pennydrop")
+    componentVersion.set(provider { android.defaultConfig.versionName ?: "0.0.0" })
+    projectType.set(Component.Type.APPLICATION)
+
     includeConfigs.set(listOf("releaseRuntimeClasspath"))
     skipConfigs.set(listOf(".*test.*", ".*Test.*", ".*debug.*", ".*Debug.*"))
     jsonOutput.set(layout.buildDirectory.file("reports/sbom/bom.json"))
