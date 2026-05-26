@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "prConcurrentLimit": 5,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Allow detekt alpha-to-alpha updates since stable 2.x targeting Kotlin 2.3 does not exist yet",
+      "matchPackageNames": ["/^dev\\.detekt/"],
+      "ignoreUnstable": false
+    }
+  ]
+}
