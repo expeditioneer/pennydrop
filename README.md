@@ -25,16 +25,22 @@ with navigation-compose and Hilt for DI.
 ./gradlew :app:installDebug
 ```
 
-Or open the project in Android Studio Hedgehog (or newer) and run the
+Or open the project in Android Studio Panda 1 (or newer) and run the
 `app` configuration.
 
 ### Nix users
 
-A `flake.nix` is provided that pins JDK 21 and the Android command-line
-tools. With direnv installed:
+A `flake.nix` is provided that pins JDK 21, the Android SDK and Android
+Studio. With direnv installed:
 
 ```sh
 direnv allow   # picks up .envrc and enters the devshell
+```
+
+To open the project in the pinned Android Studio (x86_64 Linux only):
+
+```sh
+nix run .#android-studio -- "$PWD"
 ```
 
 ## Tests

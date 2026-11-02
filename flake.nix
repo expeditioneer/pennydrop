@@ -2,7 +2,7 @@
   description = "Penny Drop – Android development environment";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -28,6 +28,11 @@
         androidSdk = androidComposition.androidsdk;
         androidHome = "${androidSdk}/libexec/android-sdk";
       in {
+        # Separate from the devShell so CI doesn't download the IDE.
+        packages = pkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          android-studio = pkgs.android-studio.withSdk androidSdk;
+        };
+
         devShells.default = pkgs.mkShell {
           buildInputs = [
             pkgs.jdk21
